@@ -656,7 +656,7 @@ export default function App() {
     try { const s = localStorage.getItem(S_STATE); if (s) return JSON.parse(s); } catch(_) {}
     return initPrivacy();
   });
-  const [log, setLog] = useState(() => {
+  const [, setLog] = useState(() => {
     try { const s = localStorage.getItem(S_LOG); if (s) return JSON.parse(s); } catch(_) {}
     return [];
   });
