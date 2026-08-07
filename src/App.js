@@ -1,13 +1,11 @@
 import { useState, useEffect, useRef } from "react";
 
-// ─── SUPABASE CONFIG ───────────────────────────────────────────────────────────
 const SUPABASE_URL      = "https://iljzwxwopxuzpgkjivmn.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_KEoCJtCLyGTJjqB1phGy2Q_v3PftUYH";
 const S_STATE   = "shdm_low_manual_state";
 const S_SESSION = "shdm_low_manual_session_id";
 const FLOW      = "low_manual";
 
-// ─── DATA ─────────────────────────────────────────────────────────────────────
 const ACQ_CATS = [
   { id: "sensors",   label: "Home Sensors" },
   { id: "behavior",  label: "Behavior Patterns" },
@@ -25,16 +23,14 @@ const OFFERS = [
   { id: "4", emoji: "🍝", name: "Pasta Bowl",     desc: "Pasta, Garlic Bread, Salad",              price: 16.99, original: 21.99 },
 ];
 
-// ─── TASKS ────────────────────────────────────────────────────────────────────
 const TASKS = [
-  { id: "task1", label: "Task 1", desc: "Review the suggested settings in the Data Collection and Data Usage tabs and adjust them according to your preferences.", screen: "consent" },
-  { id: "task2", label: "Task 2", desc: "Configure the Data Collection tab by allowing or denying access to home sensors and purchase history.", screen: "consent" },
-  { id: "task3", label: "Task 3", desc: "Configure the Data Usage tab by allowing or denying access to home services and wellness-related services.", screen: "consent" },
-  { id: "task4", label: "Task 4", desc: "Review all three tabs: Food, Home, and Wellness. Explore and select one offer that best matches your preferences.", screen: "offers" },
-  { id: "task5", label: "Task 5", desc: "Review the final order summary and confirm or place the order.", screen: "order" },
+  { id: "task1", label: "Task 1", desc: "Review the suggested settings in the Data Collection and Data Usage tabs and adjust them according to your preferences." },
+  { id: "task2", label: "Task 2", desc: "Configure the Data Collection tab by allowing or denying access to home sensors and purchase history." },
+  { id: "task3", label: "Task 3", desc: "Configure the Data Usage tab by allowing or denying access to home services and wellness-related services." },
+  { id: "task4", label: "Task 4", desc: "Review all three tabs: Food, Home, and Wellness. Explore and select one offer that best matches your preferences." },
+  { id: "task5", label: "Task 5", desc: "Review the final order summary and confirm or place the order." },
 ];
 
-// ─── SESSION ──────────────────────────────────────────────────────────────────
 function getOrCreateSessionId() {
   try {
     let id = localStorage.getItem(S_SESSION);
@@ -43,7 +39,6 @@ function getOrCreateSessionId() {
   } catch (_) { return `${Date.now()}-${Math.random().toString(36).slice(2)}`; }
 }
 
-// ─── SUPABASE ─────────────────────────────────────────────────────────────────
 async function logEvent(row) {
   try {
     await fetch(`${SUPABASE_URL}/rest/v1/interaction_logs`, {
@@ -64,15 +59,14 @@ async function logTaskSummary(row) {
   } catch (_) {}
 }
 
-// ─── TASK TRACKER ─────────────────────────────────────────────────────────────
 function createTracker(sessionId) {
   const s = { task: null, start: null, clicks: 0, errors: 0, overrides: 0, depth: 0 };
   return {
     start(taskId) { s.task = taskId; s.start = Date.now(); s.clicks = 0; s.errors = 0; s.overrides = 0; s.depth = 0; },
-    click() { s.clicks++; },
-    error() { s.errors++; },
+    click()    { s.clicks++; },
+    error()    { s.errors++; },
     override() { s.clicks++; s.overrides++; },
-    depth(d) { if (d > s.depth) s.depth = d; },
+    depth(d)   { if (d > s.depth) s.depth = d; },
     complete(offerName = null, orderPlaced = false) {
       if (!s.task) return null;
       const time_ms = Date.now() - s.start;
@@ -81,11 +75,9 @@ function createTracker(sessionId) {
       s.task = null;
       return result;
     },
-    get() { return { ...s }; },
   };
 }
 
-// ─── STYLES ───────────────────────────────────────────────────────────────────
 const CSS = `
   @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
@@ -103,7 +95,8 @@ const CSS = `
   .task-cb.active { border-color: #4263eb; }
   .task-lbl { font-size: 12px; font-weight: 600; color: #111827; }
   .task-desc { font-size: 11px; color: #6b7280; margin-top: 2px; line-height: 1.4; }
-  .main { flex: 1; padding: 24px; max-width: 600px; }
+  .content-area { flex: 1; display: flex; justify-content: center; background: #f5f6fa; }
+  .main { width: 100%; max-width: 600px; padding: 24px; }
   .task-banner { background: #1e1b4b; color: #e0e7ff; border-radius: 10px; padding: 14px 16px; margin-bottom: 20px; }
   .task-banner-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; opacity: .6; margin-bottom: 4px; }
   .task-banner-desc { font-size: 13px; line-height: 1.5; }
@@ -149,7 +142,6 @@ const CSS = `
   .stat-val { font-size: 20px; font-weight: 700; }
 `;
 
-// ─── TASK SIDEBAR ─────────────────────────────────────────────────────────────
 function TaskSidebar({ completed, active, onSelect }) {
   return (
     <div className="sidebar">
@@ -173,7 +165,6 @@ function TaskSidebar({ completed, active, onSelect }) {
   );
 }
 
-// ─── TASK BANNER ─────────────────────────────────────────────────────────────
 function TaskBanner({ task, onComplete }) {
   if (!task) return null;
   return (
@@ -185,7 +176,10 @@ function TaskBanner({ task, onComplete }) {
   );
 }
 
-// ─── HOME SCREEN ─────────────────────────────────────────────────────────────
+function Wrap({ children }) {
+  return <div className="content-area"><div className="main">{children}</div></div>;
+}
+
 function HomeScreen({ onConsent, activeTask, onTaskComplete, sessionId, tracker }) {
   useEffect(() => {
     const t0 = Date.now();
@@ -194,7 +188,7 @@ function HomeScreen({ onConsent, activeTask, onTaskComplete, sessionId, tracker 
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
   const now = new Date();
   return (
-    <div className="main">
+    <Wrap>
       <TaskBanner task={activeTask} onComplete={onTaskComplete} />
       <div style={{ textAlign: "center", padding: "32px 0 24px" }}>
         <div style={{ width: 64, height: 64, borderRadius: "50%", background: "#eef1ff", display: "flex", alignItems: "center", justifyContent: "center", fontSize: 28, margin: "0 auto 16px" }}>🏠</div>
@@ -214,11 +208,10 @@ function HomeScreen({ onConsent, activeTask, onTaskComplete, sessionId, tracker 
         <div className="stat"><div className="stat-lbl">Temperature</div><div className="stat-val">22°C</div></div>
         <div className="stat"><div className="stat-lbl">People Home</div><div className="stat-val">2</div></div>
       </div>
-    </div>
+    </Wrap>
   );
 }
 
-// ─── CONSENT SCREEN ───────────────────────────────────────────────────────────
 function ConsentScreen({ acq, setAcq, proc, setProc, onBack, onDone, activeTask, onTaskComplete, sessionId, tracker, saved, setSaved }) {
   useEffect(() => {
     const t0 = Date.now();
@@ -229,54 +222,31 @@ function ConsentScreen({ acq, setAcq, proc, setProc, onBack, onDone, activeTask,
   const [tab, setTab] = useState(activeTask?.id === "task3" ? "usage" : "collection");
 
   function toggleAcq(id, val) {
-    const prev = acq[id];
-    const next = prev === val ? null : val;
-    if (prev !== null && prev !== next && next !== null) tracker.override();
-    else tracker.click();
-    // Error: wrong tab for task2 = usage tab, task3 = collection tab (handled via tab switch)
-    setAcq(a => ({ ...a, [id]: next }));
-    setSaved(false);
+    const prev = acq[id]; const next = prev === val ? null : val;
+    if (prev !== null && prev !== next && next !== null) tracker.override(); else tracker.click();
+    setAcq(a => ({ ...a, [id]: next })); setSaved(false);
     logEvent({ session_id: sessionId, flow: FLOW, event_type: prev !== null && next !== null ? "override" : "toggle", item: id, value: next, task: activeTask?.id || null, client_timestamp: new Date().toISOString() });
   }
   function toggleProc(id, val) {
-    const prev = proc[id];
-    const next = prev === val ? null : val;
-    if (prev !== null && prev !== next && next !== null) tracker.override();
-    else tracker.click();
-    setProc(p => ({ ...p, [id]: next }));
-    setSaved(false);
+    const prev = proc[id]; const next = prev === val ? null : val;
+    if (prev !== null && prev !== next && next !== null) tracker.override(); else tracker.click();
+    setProc(p => ({ ...p, [id]: next })); setSaved(false);
     logEvent({ session_id: sessionId, flow: FLOW, event_type: prev !== null && next !== null ? "override" : "toggle", item: id, value: next, task: activeTask?.id || null, client_timestamp: new Date().toISOString() });
   }
   function switchTab(t) {
-    // Error if switching to wrong tab
-    if (activeTask?.id === "task2" && t === "usage") {
-      tracker.error();
-      logEvent({ session_id: sessionId, flow: FLOW, event_type: "error", element: "tab_switch_wrong", value: t, task: activeTask?.id, client_timestamp: new Date().toISOString() });
-    }
-    if (activeTask?.id === "task3" && t === "collection") {
-      tracker.error();
-      logEvent({ session_id: sessionId, flow: FLOW, event_type: "error", element: "tab_switch_wrong", value: t, task: activeTask?.id, client_timestamp: new Date().toISOString() });
-    }
-    tracker.click();
-    setTab(t);
+    if (activeTask?.id === "task2" && t === "usage")      { tracker.error(); logEvent({ session_id: sessionId, flow: FLOW, event_type: "error", element: "tab_switch_wrong", value: t, task: activeTask?.id, client_timestamp: new Date().toISOString() }); }
+    if (activeTask?.id === "task3" && t === "collection") { tracker.error(); logEvent({ session_id: sessionId, flow: FLOW, event_type: "error", element: "tab_switch_wrong", value: t, task: activeTask?.id, client_timestamp: new Date().toISOString() }); }
+    tracker.click(); setTab(t);
     logEvent({ session_id: sessionId, flow: FLOW, event_type: "tab_switch", from: tab, to: t, task: activeTask?.id || null, client_timestamp: new Date().toISOString() });
   }
-  function handleSave() {
-    tracker.click();
-    setSaved(true);
-    logEvent({ session_id: sessionId, flow: FLOW, event_type: "click", element: "save_my_choices", task: activeTask?.id || null, client_timestamp: new Date().toISOString() });
-  }
+  function handleSave() { tracker.click(); setSaved(true); logEvent({ session_id: sessionId, flow: FLOW, event_type: "click", element: "save_my_choices", task: activeTask?.id || null, client_timestamp: new Date().toISOString() }); }
   function handleDone() {
-    if (!saved && activeTask && ["task2","task3"].includes(activeTask.id)) {
-      tracker.error();
-      logEvent({ session_id: sessionId, flow: FLOW, event_type: "error", element: "done_without_saving", task: activeTask.id, client_timestamp: new Date().toISOString() });
-    }
-    tracker.click();
-    onDone();
+    if (!saved && activeTask && ["task2","task3"].includes(activeTask.id)) { tracker.error(); logEvent({ session_id: sessionId, flow: FLOW, event_type: "error", element: "done_without_saving", task: activeTask.id, client_timestamp: new Date().toISOString() }); }
+    tracker.click(); onDone();
   }
 
   return (
-    <div className="main">
+    <Wrap>
       <TaskBanner task={activeTask} onComplete={onTaskComplete} />
       <div className="back" onClick={() => { tracker.click(); onBack(); }}>← Back to Home</div>
       <div className="page-title">Privacy Settings</div>
@@ -296,9 +266,7 @@ function ConsentScreen({ acq, setAcq, proc, setProc, onBack, onDone, activeTask,
               </div>
             </div>
           ))}
-          <div className="save-row">
-            <button className={`btn-save${saved ? " saved" : ""}`} onClick={handleSave}>{saved ? "Saved!" : "Save My Choices"}</button>
-          </div>
+          <div className="save-row"><button className={`btn-save${saved ? " saved" : ""}`} onClick={handleSave}>{saved ? "Saved!" : "Save My Choices"}</button></div>
         </>
       )}
       {tab === "usage" && (
@@ -312,17 +280,14 @@ function ConsentScreen({ acq, setAcq, proc, setProc, onBack, onDone, activeTask,
               </div>
             </div>
           ))}
-          <div className="save-row">
-            <button className={`btn-save${saved ? " saved" : ""}`} onClick={handleSave}>{saved ? "Saved!" : "Save My Choices"}</button>
-          </div>
+          <div className="save-row"><button className={`btn-save${saved ? " saved" : ""}`} onClick={handleSave}>{saved ? "Saved!" : "Save My Choices"}</button></div>
         </>
       )}
       <button className="btn-done" onClick={handleDone}>Done – Return to Home</button>
-    </div>
+    </Wrap>
   );
 }
 
-// ─── OFFERS SCREEN ────────────────────────────────────────────────────────────
 function OffersScreen({ onSelect, onBack, activeTask, onTaskComplete, sessionId, tracker }) {
   useEffect(() => {
     const t0 = Date.now();
@@ -333,17 +298,15 @@ function OffersScreen({ onSelect, onBack, activeTask, onTaskComplete, sessionId,
 
   function handleBack() {
     if (activeTask?.id === "task4") { tracker.error(); logEvent({ session_id: sessionId, flow: FLOW, event_type: "error", element: "left_offers_without_selection", task: "task4", client_timestamp: new Date().toISOString() }); }
-    tracker.click();
-    onBack();
+    tracker.click(); onBack();
   }
   function switchTab(t) {
-    tracker.click();
-    setTab(t);
+    tracker.click(); setTab(t);
     logEvent({ session_id: sessionId, flow: FLOW, event_type: "tab_switch", from: tab, to: t, task: activeTask?.id || null, client_timestamp: new Date().toISOString() });
   }
 
   return (
-    <div className="main">
+    <Wrap>
       <TaskBanner task={activeTask} onComplete={onTaskComplete} />
       <div className="back" onClick={handleBack}>← Back to Home</div>
       <div className="tabs">
@@ -365,11 +328,10 @@ function OffersScreen({ onSelect, onBack, activeTask, onTaskComplete, sessionId,
       ) : (
         <div style={{ fontSize: 14, color: "#6b7280", padding: "20px 0" }}>No offers available for this category.</div>
       )}
-    </div>
+    </Wrap>
   );
 }
 
-// ─── ORDER SCREEN ─────────────────────────────────────────────────────────────
 function OrderScreen({ offer, onPlace, onBack, activeTask, onTaskComplete, sessionId, tracker, setOrderConfirmed }) {
   useEffect(() => {
     const t0 = Date.now();
@@ -379,12 +341,11 @@ function OrderScreen({ offer, onPlace, onBack, activeTask, onTaskComplete, sessi
 
   function handleBack() {
     if (activeTask?.id === "task5") { tracker.error(); logEvent({ session_id: sessionId, flow: FLOW, event_type: "error", element: "left_order_without_confirming", task: "task5", client_timestamp: new Date().toISOString() }); }
-    tracker.click();
-    onBack();
+    tracker.click(); onBack();
   }
 
   return (
-    <div className="main">
+    <Wrap>
       <TaskBanner task={activeTask} onComplete={onTaskComplete} />
       <div className="back" onClick={handleBack}>← Back to Offers</div>
       <div className="order-card">
@@ -395,20 +356,18 @@ function OrderScreen({ offer, onPlace, onBack, activeTask, onTaskComplete, sessi
         <div className="order-line"><span>Total</span><span>${offer.price.toFixed(2)}</span></div>
       </div>
       <button className="btn-confirm" onClick={() => {
-        tracker.click();
-        setOrderConfirmed(true);
+        tracker.click(); setOrderConfirmed(true);
         logEvent({ session_id: sessionId, flow: FLOW, event_type: "click", element: "confirm_place_order", offer: offer.name, task: activeTask?.id || null, client_timestamp: new Date().toISOString() });
         logEvent({ session_id: sessionId, flow: FLOW, event_type: "order_placed", offer: offer.name, task: activeTask?.id || null, client_timestamp: new Date().toISOString() });
         onPlace();
       }}>Place Order</button>
-    </div>
+    </Wrap>
   );
 }
 
-// ─── CONFIRM SCREEN ───────────────────────────────────────────────────────────
 function ConfirmScreen({ onHome, activeTask, onTaskComplete }) {
   return (
-    <div className="main">
+    <Wrap>
       <TaskBanner task={activeTask} onComplete={onTaskComplete} />
       <div className="confirm-wrap">
         <div className="confirm-box">
@@ -418,11 +377,10 @@ function ConfirmScreen({ onHome, activeTask, onTaskComplete }) {
           <button className="btn-confirm" style={{ marginTop: 24 }} onClick={onHome}>Back to Home</button>
         </div>
       </div>
-    </div>
+    </Wrap>
   );
 }
 
-// ─── APP ──────────────────────────────────────────────────────────────────────
 export default function App() {
   const sessionId = useRef(getOrCreateSessionId()).current;
   const tracker   = useRef(createTracker(sessionId)).current;
@@ -434,15 +392,14 @@ export default function App() {
   const [orderConfirmed, setOrderConfirmed] = useState(false);
   const [saved,          setSaved]          = useState(false);
 
-  // Privacy state — all deny by default (manual mode)
-  const [acq, setAcq] = useState({ sensors: null, behavior: null, purchases: null });
+  const [acq,  setAcq]  = useState({ sensors: null, behavior: null, purchases: null });
   const [proc, setProc] = useState({ food: null, home: null, wellness: null });
 
   function startTask(task) {
     if (completed.includes(task.id)) return;
-    // Reset for task 2 and 3
-    if (task.id === "task2") { setAcq({ sensors: "deny", behavior: "deny", purchases: "deny" }); setSaved(false); }
-    if (task.id === "task3") { setProc({ food: "deny", home: "deny", wellness: "deny" }); setSaved(false); }
+    setSaved(false);
+    if (task.id === "task2") setAcq({ sensors: "deny", behavior: "deny", purchases: "deny" });
+    if (task.id === "task3") setProc({ food: "deny", home: "deny", wellness: "deny" });
     tracker.start(task.id);
     setActiveTask(task);
     if (["task1","task2","task3"].includes(task.id)) setScreen("consent");
