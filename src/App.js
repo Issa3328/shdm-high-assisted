@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from "react";
 
 const SUPABASE_URL      = "https://iljzwxwopxuzpgkjivmn.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_KEoCJtCLyGTJjqB1phGy2Q_v3PftUYH";
-const S_STATE   = "shdm_low_manual_state";
 const S_SESSION = "shdm_low_manual_session_id";
 const FLOW      = "low_manual";
 
