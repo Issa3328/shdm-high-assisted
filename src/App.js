@@ -27,7 +27,6 @@ const BellIcon      = (p) => <Svg {...p}><path d="M10.268 21a2 2 0 0 0 3.464 0"/
 const SUPABASE_URL      = "https://iljzwxwopxuzpgkjivmn.supabase.co";
 const SUPABASE_ANON_KEY = "sb_publishable_KEoCJtCLyGTJjqB1phGy2Q_v3PftUYH";
 const FLOW              = "high_assisted";
-const SURVEY_RETURN_URL = "https://www.surveymonkey.ca/r/5C7MWMD";
 const MODE_LABEL        = "Info: High · Control: Assisted";
 const VISIBILITY        = "high";   // low | medium | high
 const AUTOMATION        = "assisted";   // manual | assisted | automated
@@ -1136,7 +1135,7 @@ function CompleteScreen({ orderNum, offer }) {
           <span>Your data was used securely to personalize this offer</span>
         </div>
 
-        <p className="text-xs text-gray-500">Redirecting to survey…</p>
+        <p className="text-sm font-medium text-gray-700">All tasks completed. Please close this tab and return to the survey to answer the remaining questions.</p>
       </div>
     </div>
   );
@@ -1238,11 +1237,8 @@ export default function App() {
     syncTasks(tracker.complete(4, "order_place", { offer:selectedOffer?.name, orderPlaced:true }));
     setOrderNum(num);
     setStage("complete");
-    setTimeout(() => {
-      const url = `${SURVEY_RETURN_URL}?session=${encodeURIComponent(tracker.participantId)}`;
-      tracker.event("survey_redirect", { page:"complete", details:{ url } });
-      window.location.href = url;
-    }, 2500);
+    // participant returns to the SurveyMonkey tab (still open) for the remaining questions
+    tracker.event("study_finished", { page:"complete" });
   }
 
   const sp = { tracker };
