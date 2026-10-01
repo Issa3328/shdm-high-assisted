@@ -215,6 +215,94 @@ const TASKS = [
     desc:"Review the order summary based on the offer you selected. When you are ready, confirm your order to place it." },
 ];
 
+/* ---- SHDM study UI: task prompt, mobile layout, completion message ---- */
+if (typeof document !== "undefined" && !document.getElementById("shdm-ux")) {
+  const st = document.createElement("style");
+  st.id = "shdm-ux";
+  st.textContent = `
+.shdm-taskbar { background:#1e1b4b; color:#e0e7ff; }
+.shdm-tb-inner { display:flex; align-items:flex-start; gap:16px; padding:18px 260px 18px 24px; }
+.shdm-tb-num { width:40px; height:40px; border-radius:50%; flex-shrink:0; display:flex; align-items:center; justify-content:center;
+  background:rgba(99,102,241,0.25); border:1.5px solid rgba(99,102,241,0.6); font-size:17px; font-weight:700; color:#c7d2fe; }
+.shdm-tb-body { flex:1; min-width:0; max-width:820px; }
+.shdm-tb-head { font-size:13px; font-weight:700; text-transform:uppercase; letter-spacing:.08em; color:#a5b4fc; margin:0 0 4px; }
+.shdm-tb-title { font-size:20px; font-weight:600; line-height:1.3; color:#ffffff; margin:0 0 8px; }
+.shdm-tb-lines { margin:0; padding:0 0 0 20px; list-style:disc; font-size:16px; line-height:1.55; color:#e0e7ff; }
+.shdm-tb-lines li { margin:0 0 4px; }
+.shdm-tb-progress { height:4px; background:rgba(255,255,255,0.08); }
+.shdm-tb-progress > div { height:100%; background:linear-gradient(90deg,#6366f1,#818cf8); transition:width .4s ease; }
+.shdm-badge { position:fixed; top:12px; right:12px; z-index:50; }
+.shdm-main { min-width:0; }
+.shdm-done { position:fixed; inset:0; z-index:1000; display:flex; align-items:center; justify-content:center; padding:24px;
+  background:rgba(17,24,39,0.72); }
+.shdm-done-card { width:100%; max-width:600px; background:#fff; border-radius:16px; padding:44px 40px; text-align:center;
+  box-shadow:0 25px 50px -12px rgba(0,0,0,0.45); }
+.shdm-done-check { width:84px; height:84px; border-radius:50%; background:#16a34a; color:#fff; display:flex; align-items:center;
+  justify-content:center; margin:0 auto 24px; }
+.shdm-done-title { font-size:32px; line-height:1.2; font-weight:700; color:#111827; margin:0 0 16px; }
+.shdm-done-text { font-size:21px; line-height:1.5; color:#1f2937; margin:0 0 12px; }
+.shdm-done-hint { font-size:16px; line-height:1.5; color:#6b7280; margin:0; }
+@media (max-width: 767px) {
+  .shdm-root { flex-direction:column !important; }
+  .shdm-sidebar { display:none !important; }
+  .shdm-badge { position:static; order:-1; display:flex; justify-content:flex-end; padding:8px 12px; background:#fff; border-bottom:1px solid #e5e7eb; }
+  .shdm-tb-inner { gap:12px; padding:14px 16px; }
+  .shdm-tb-num { width:32px; height:32px; font-size:15px; }
+  .shdm-tb-head { font-size:12px; }
+  .shdm-tb-title { font-size:18px; margin-bottom:6px; }
+  .shdm-tb-lines { font-size:15px; line-height:1.5; padding-left:18px; }
+  .shdm-cat-head { flex-wrap:wrap; row-gap:10px; }
+  .shdm-cat-head > :first-child { flex-basis:100%; min-width:0; }
+  .shdm-cat-actions { margin-left:auto !important; flex-direction:row !important; align-items:center !important; gap:8px !important; }
+  .shdm-cat-name { flex-wrap:wrap; }
+  .shdm-done-card { padding:32px 22px; }
+  .shdm-done-check { width:68px; height:68px; margin-bottom:18px; }
+  .shdm-done-title { font-size:26px; }
+  .shdm-done-text { font-size:19px; }
+}
+`;
+  document.head.appendChild(st);
+}
+
+function StudyTaskBar({ sidebarVisible, currentTask }) {
+  if (!sidebarVisible || currentTask >= TASKS.length) return null;
+  const t = TASKS[currentTask];
+  const lines = (t.desc.match(/[^.]+\.?/g) || [t.desc]).map(s => s.trim()).filter(Boolean);
+  return (
+    <div className="shdm-taskbar" role="region" aria-label="Current task">
+      <div className="shdm-tb-inner">
+        <div className="shdm-tb-num">{currentTask + 1}</div>
+        <div className="shdm-tb-body">
+          <p className="shdm-tb-head">{t.label} of {TASKS.length}</p>
+          <p className="shdm-tb-title">{t.short}</p>
+          <ul className="shdm-tb-lines">
+            {lines.map((l, i) => <li key={i}>{l}</li>)}
+          </ul>
+        </div>
+      </div>
+      <div className="shdm-tb-progress"><div style={{ width: `${((currentTask + 1) / TASKS.length) * 100}%` }} /></div>
+    </div>
+  );
+}
+
+function StudyDoneOverlay() {
+  return (
+    <div className="shdm-done" role="dialog" aria-modal="true" aria-labelledby="shdm-done-title">
+      <div className="shdm-done-card">
+        <div className="shdm-done-check">
+          <svg width="40" height="40" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={3} d="M5 13l4 4L19 7" />
+          </svg>
+        </div>
+        <h1 id="shdm-done-title" className="shdm-done-title">All tasks completed. Thank you!</h1>
+        <p className="shdm-done-text">Please go back to the survey to answer the remaining questions.</p>
+        <p className="shdm-done-hint">You can close this page now.</p>
+      </div>
+    </div>
+  );
+}
+
+
 function studyLog(payload) {
   try {
     fetch(`${SUPABASE_URL}/rest/v1/rpc/study_log`, {
@@ -359,7 +447,7 @@ const sensitivityColor = (level) => {
 
 function TaskSidebar({ doneTasks, currentTask }) {
   return (
-    <div className="sidebar">
+    <div className="sidebar shdm-sidebar">
       <div className="sidebar-title">Your Tasks</div>
       {TASKS.map((t, i) => {
         const isDone   = doneTasks.includes(i);
@@ -390,20 +478,13 @@ function TaskSidebar({ doneTasks, currentTask }) {
   );
 }
 
-function TaskBar({ sidebarVisible, currentTask }) {
-  if (!sidebarVisible || currentTask >= TASKS.length) return null;
-  const t = TASKS[currentTask];
-  return (
-    <div style={{background:"#1e1b4b", color:"#e0e7ff", padding:"12px 20px", fontSize:13, lineHeight:1.5}}>
-      <span style={{fontSize:11, fontWeight:600, textTransform:"uppercase", letterSpacing:".06em", opacity:.6, marginRight:8}}>{t.label}:</span>
-      {t.desc}
-    </div>
-  );
+function TaskBar(props) {
+  return <StudyTaskBar {...props} />;
 }
 
 function ModeBadge() {
   return (
-    <div className="fixed top-3 right-3 z-50">
+    <div className="shdm-badge">
       <span className="text-xs px-2.5 py-1 rounded-full border font-medium shadow-sm bg-indigo-50 text-indigo-700 border-indigo-200">
         {MODE_LABEL}
       </span>
@@ -453,14 +534,14 @@ function ConsentCatBlock({ cat, enabled, onToggle, onAction, isProc }) {
   return (
     <div className="border-2 border-gray-200 rounded-lg bg-gradient-to-br from-white to-gray-50">
       <div className="p-4">
-        <div className="flex items-start justify-between mb-2">
+        <div className="flex items-start justify-between mb-2 shdm-cat-head">
           <div className="flex items-start gap-3 flex-1">
             <button onClick={toggleExpand} className="p-1 hover:bg-gray-100 rounded mt-1" aria-label="Expand">
               {expanded ? <ChevronDown className={`w-4 h-4 ${chevronColor}`}/> : <ChevronRight className={`w-4 h-4 ${chevronColor}`}/>}
             </button>
             <div className={`w-9 h-9 ${isProc ? "bg-purple-100" : "bg-blue-100"} rounded-lg flex items-center justify-center text-lg flex-shrink-0`}>{cat.icon}</div>
             <div className="flex-1">
-              <div className="flex items-center gap-2 mb-1">
+              <div className="flex items-center gap-2 mb-1 shdm-cat-name">
                 <span className="font-semibold text-sm">{cat.label}</span>
                 <span className={`text-xs px-2 py-0.5 rounded-full border ${sensitivityColor(cat.sensitivity)}`}>
                   {cat.sensitivity} sensitivity
@@ -486,7 +567,7 @@ function ConsentCatBlock({ cat, enabled, onToggle, onAction, isProc }) {
               )}
             </div>
           </div>
-          <div className="ml-4 flex flex-col gap-1 items-end">
+          <div className="ml-4 flex flex-col gap-1 items-end shdm-cat-actions">
             {isRec && <span className="text-xs text-blue-600 font-medium flex items-center gap-1"><StarIcon className="w-3 h-3"/> Rec.</span>}
             <div className="flex gap-1">
               <button onClick={() => onToggle(false)} className={`px-3 py-1.5 text-xs rounded-lg font-medium ${!enabled ? "bg-gray-400 text-white" : "bg-gray-100 text-gray-600 border border-gray-300"}`}>Deny</button>
@@ -1165,10 +1246,10 @@ export default function App() {
   const sp = { tracker };
 
   return (
-    <div className="app">
+    <div className="app shdm-root">
       <ModeBadge/>
       {sidebarVisible && <TaskSidebar doneTasks={doneTasks} currentTask={currentTask}/>}
-      <div style={{flex:1, minWidth:0, display:"flex", flexDirection:"column"}}>
+      <div className="shdm-main" style={{flex:1, minWidth:0, display:"flex", flexDirection:"column"}}>
         <TaskBar sidebarVisible={sidebarVisible} currentTask={currentTask}/>
         <div style={{flex:1, display:"flex", flexDirection:"column"}}>
           {stage === "home"      && <HomeScreen    {...sp} onConsent={goConsent}/>}
@@ -1176,6 +1257,7 @@ export default function App() {
           {stage === "analyzing" && <AnalyzingScreen/>}
           {stage === "offers"    && <OffersScreen  {...sp} onSelect={handleSelectOffer} onBack={() => setStage("home")}/>}
           {stage === "order"     && selectedOffer && <OrderScreen {...sp} offer={selectedOffer} onPlace={handlePlaceOrder} onBack={() => setStage("offers")}/>}
+          {stage === "complete"  && <StudyDoneOverlay/>}
           {stage === "complete"  && <CompleteScreen orderNum={orderNum} offer={selectedOffer}/>}
         </div>
       </div>
