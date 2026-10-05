@@ -1182,7 +1182,26 @@ function AnalyzingScreen() {
   );
 }
 
+/* If the prototype is opened without a participant ID (e.g. a direct link from the survey),
+   go once through the landing page. It knows the ID from the start of the survey and sends
+   the participant straight back here with ?session=<ID>. */
+const LANDING_URL = "https://shdm-landing.vercel.app";
+function needsLandingHop() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    if ((p.get("session") || p.get("pid") || "").trim()) return false;
+    if ((sessionStorage.getItem("shdm_participant_id") || "").trim()) return false;
+    return true;
+  } catch { return false; }
+}
+const HOP_TO_LANDING = typeof window !== "undefined" && needsLandingHop();
+if (HOP_TO_LANDING) window.location.replace(`${LANDING_URL}/p/${FLOW}`);
+
 export default function App() {
+  return HOP_TO_LANDING ? null : <StudyApp />;
+}
+
+function StudyApp() {
   const trackerRef = useRef(null);
   if (!trackerRef.current) trackerRef.current = createStudyTracker();
   const tracker = trackerRef.current;
